@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NamedRangeTestApp.DataAccess.Base;
+using NamedRangeTestApp.Models;
 
 namespace NamedRangeTestApp.Controllers
 {
@@ -26,8 +27,10 @@ namespace NamedRangeTestApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post()
+        public IActionResult Post([FromBody] InputModel input)
         {
+            _excelService.InsertValuesToNamedRange(input.NamedRange, input.Values);
+
             return StatusCode(201);
         }
     }
