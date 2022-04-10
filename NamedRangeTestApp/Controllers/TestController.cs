@@ -10,18 +10,20 @@ namespace NamedRangeTestApp.Controllers
     public class TestController : ControllerBase
     {
         private readonly ILogger<TestController> _logger;
-        private readonly IExcelService _excelService;
+        private readonly INamedRangeExcelService _namedRangeExcelService;
+        private readonly ITestExcelService _testExcelService;
 
-        public TestController(ILogger<TestController> logger, IExcelService excelService)
+        public TestController(ILogger<TestController> logger, INamedRangeExcelService excelService, ITestExcelService testExcelService)
         {
             _logger = logger;
-            _excelService = excelService;
+            _namedRangeExcelService = excelService;
+            _testExcelService = testExcelService;
         }
 
         [HttpGet]
         public IActionResult Get(string namedRange = "TestRange")
         {
-            var result = _excelService.GetCellsByNamedRange(namedRange);
+            var result = _namedRangeExcelService.GetCellsByNamedRange(namedRange);
 
             return Ok(result);
         }
@@ -29,9 +31,17 @@ namespace NamedRangeTestApp.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] InputModel input)
         {
-            _excelService.InsertValuesToNamedRange(input.NamedRange, input.Values);
+            _namedRangeExcelService.InsertValuesToNamedRange(input.NamedRange, input.Values);
 
             return StatusCode(201);
+        }
+
+        [HttpPost("scenario")]
+        public IActionResult PostScenario([FromBody] InputModel input)
+        {
+            var result = _testExcelService.CheckNamedRangeReferences(input.NamedRange, input.Values);
+
+            return StatusCode(201, result);
         }
     }
 }

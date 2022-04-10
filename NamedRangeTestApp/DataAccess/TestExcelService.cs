@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using NamedRangeTestApp.DataAccess.Base;
+using NamedRangeTestApp.DataAccess.Common;
 using NamedRangeTestApp.Exceptions;
 using NamedRangeTestApp.Extensions;
 using NamedRangeTestApp.Models;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace NamedRangeTestApp.DataAccess
 {
-    public class TestExcelService : IExcelService
+    public class TestExcelService : ExcelService, ITestExcelService
     {
         private readonly ILogger<TestExcelService> _logger;
 
@@ -19,45 +19,42 @@ namespace NamedRangeTestApp.DataAccess
             _logger = logger;
         }
 
-        private static ExcelPackage InitPackage(string subdir, string fileName)
+        public IEnumerable<Cell> CheckNamedRangeReferences(string namedRange, string[] values)
         {
-            var currentDir = Directory.GetCurrentDirectory();
-            var file = new FileInfo($"{currentDir}/{subdir}/{fileName}");
+            using var scenarioPackage = InitPackage("Data/testSet", "scenario.xlsx");
 
-            if (!file.Exists)
-                throw new Exception("File does not exist");
-
-            return new ExcelPackage(file);
-        }
-
-        public IEnumerable<Cell> GetCellsByNamedRange(string namedRange)
-        {
-            using var package = InitPackage("Data", "testExcel.xlsx");
-
-            var wb = package.Workbook;
-            var cellRange = wb.Names[namedRange];
-
-            var result = cellRange.GetCells();
-
-            return result;
-        }
-
-        public void InsertValuesToNamedRange(string namedRange, string[] values)
-        {
-            using var package = InitPackage("Data", "testExcel.xlsx");
-
-            var wb = package.Workbook;
-            var cellRange = wb.Names[namedRange];
+            var scenarioWb = scenarioPackage.Workbook;
+            var scenarioCellRange = scenarioWb.Names[namedRange];
 
             try
             {
-                cellRange.Insert(values);
+                scenarioCellRange.Insert(values);
             }
             catch (NamedRangeInsertException ex)
             {
+                _logger.LogInformation(string.Join(',', ex.Values));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
             }
 
-            package.Save();
+            scenarioPackage.Save();
+
+            using var testCalcPackage = InitPackage("Data/testSet", "test_calc.xlsx");
+
+            var testCalcWb = testCalcPackage.Workbook;
+
+            testCalcWb.CalcMode = ExcelCalcMode.Manual;
+            testCalcWb.Calculate();
+            testCalcPackage.Save();
+
+            var testCalcCellRange = testCalcWb.Names[namedRange];
+
+            var result = testCalcCellRange.GetCells();
+
+            return result;
         }
     }
 }

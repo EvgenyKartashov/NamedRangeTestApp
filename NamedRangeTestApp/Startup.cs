@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NamedRangeTestApp.DataAccess;
 using NamedRangeTestApp.DataAccess.Base;
@@ -20,7 +19,8 @@ namespace NamedRangeTestApp
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<IExcelService, TestExcelService>();
+            services.AddTransient<INamedRangeExcelService, NamedRangeExcelService>();
+            services.AddTransient<ITestExcelService, TestExcelService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
