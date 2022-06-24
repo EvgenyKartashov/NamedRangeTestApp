@@ -4,61 +4,60 @@ using NamedRangeTestApp.Exceptions;
 using OfficeOpenXml;
 using System.Linq;
 
-namespace NamedRangeTestApp.Extensions
+namespace NamedRangeTestApp.Extensions;
+
+internal static class GameFilesExtensions
 {
-    internal static class GameFilesExtensions
+    internal static ExcelPackage InsertValuesToScenario(IConfiguration config, string namedRange, string[] values)
     {
-        internal static ExcelPackage InsertValuesToScenario(IConfiguration config, string namedRange, string[] values)
+        var baseFolder = config.GetValue<string>("Files:BaseFolder");
+        var scenarioFileName = config.GetValue<string>("Files:Scenario");
+
+        var scenarioPackage = ExcelService.InitPackage(baseFolder, scenarioFileName);
+
+        var scenarioWb = scenarioPackage.Workbook;
+        var scenarioCellRange = scenarioWb.Names.First(range => range.Name == namedRange);
+
+        try 
+        {            
+            scenarioCellRange.Insert(values);
+        }
+        catch (NamedRangeInsertException ex)
         {
-            var baseFolder = config.GetValue<string>("Files:BaseFolder");
-            var scenarioFileName = config.GetValue<string>("Files:Scenario");
-
-            var scenarioPackage = ExcelService.InitPackage(baseFolder, scenarioFileName);
-
-            var scenarioWb = scenarioPackage.Workbook;
-            var scenarioCellRange = scenarioWb.Names.First(range => range.Name == namedRange);
-
-            try 
-            {            
-                scenarioCellRange.Insert(values);
-            }
-            catch (NamedRangeInsertException ex)
-            {
-                //_logger.LogInformation(string.Join(',', ex.Values));
-            }
-
-            scenarioPackage.Save();
-
-            return scenarioPackage;
+            //_logger.LogInformation(string.Join(',', ex.Values));
         }
 
-        internal static ExcelPackage InsertValuesToCalc(this ExcelPackage scenarioPackage, IConfiguration config, string namedRange)
-        {
-            var baseFolder = config.GetValue<string>("Files:BaseFolder");
-            var calcFileName = config.GetValue<string>("Files:Calc");
+        scenarioPackage.Save();
 
-            var scenarioWb = scenarioPackage.Workbook;
-            var scenarioCellRange = scenarioWb.Names[namedRange];
+        return scenarioPackage;
+    }
 
-            var values = scenarioCellRange.GetCells()
-                .Select(cell => cell.Value)
-                .ToArray();
+    internal static ExcelPackage InsertValuesToCalc(this ExcelPackage scenarioPackage, IConfiguration config, string namedRange)
+    {
+        var baseFolder = config.GetValue<string>("Files:BaseFolder");
+        var calcFileName = config.GetValue<string>("Files:Calc");
 
-            using var testCalcPackage = ExcelService.InitPackage(baseFolder, calcFileName);
+        var scenarioWb = scenarioPackage.Workbook;
+        var scenarioCellRange = scenarioWb.Names[namedRange];
 
-            var calcWb = testCalcPackage.Workbook;
-            var calcCellRange = scenarioWb.Names.First(range => range.Name == namedRange);
+        var values = scenarioCellRange.GetCells()
+            .Select(cell => cell.Value)
+            .ToArray();
 
-            calcCellRange.Insert(values);
-            calcWb.Calculate();
-            testCalcPackage.Save();
+        using var testCalcPackage = ExcelService.InitPackage(baseFolder, calcFileName);
 
-            return scenarioPackage;
-        }
+        var calcWb = testCalcPackage.Workbook;
+        var calcCellRange = scenarioWb.Names.First(range => range.Name == namedRange);
 
-        internal static void DisposeScenarioPackage(this ExcelPackage scenarioPackage)
-        {
-            scenarioPackage.Dispose();
-        }
+        calcCellRange.Insert(values);
+        calcWb.Calculate();
+        testCalcPackage.Save();
+
+        return scenarioPackage;
+    }
+
+    internal static void DisposeScenarioPackage(this ExcelPackage scenarioPackage)
+    {
+        scenarioPackage.Dispose();
     }
 }

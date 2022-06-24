@@ -1,0 +1,24 @@
+{
+  "NLog": {
+    "variables": {
+      //"graylog_address": ""
+    },
+    "rules": [
+      {
+        "logger": "*",
+        "minLevel": "Debug",
+        "writeTo": "console"
+      },
+      {
+        "logger": "*",
+        "minLevel": "Trace",
+        "writeTo": "trace-file"
+      }
+      //{
+      //  "logger": "*",
+      //  "minLevel": "Trace",
+      //  "writeTo": "gelf-tcp"
+      //}
+    ]
+  }
+}

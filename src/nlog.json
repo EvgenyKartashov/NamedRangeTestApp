@@ -1,0 +1,90 @@
+{
+  "NLog": {
+    "throwConfigExceptions": true,
+    "internalLogLevel": "Info",
+    "internalLogFile": "/var/log/epd/{COMMON}/internal-nlog.txt", //reassign COMMON or entire path
+    "extensions": [
+      { "assembly": "NLog.Extensions.Logging" }
+      //{ "assembly": "EasyGelf.NLog" }
+    ],
+    "variables": {
+      "var_log_dir": "/var/log/epd/{COMMON}", //reassign COMMON or entire path
+      "facility": "{COMMON}", //reassign COMMON
+      "base_layout": "[${time} ${uppercase:${level}}] ${logger}${newLine}Msg: ${message}|Props: ${all-event-properties:whenEmpty=null}|Ex: ${exception:format=tostring:whenEmpty=null}${newLine}"
+      //"graylog_address": "graylog"
+    },
+    "targets": {
+      "console": {
+        "type": "Console",
+        "layout": "${base_layout}"
+      },
+      "debug-file": {
+        "type": "File",
+        "fileName": "${var_log_dir}/log/debug-${shortdate}.log",
+        "layout": "${base_layout}",
+        "archiveFileName": "${var_log_dir}/archive/{#}.log",
+        "archiveDateFormat": "yyyy-MM-dd",
+        "maxArchiveFiles": 5,
+        "archiveEvery": "Day"
+      },
+      "trace-file": {
+        "type": "File",
+        "fileName": "${var_log_dir}/log/trace-${shortdate}.log",
+        "layout": "${base_layout}",
+        "archiveFileName": "${var_log_dir}/archive/{#}.log",
+        "archiveDateFormat": "yyyy-MM-dd",
+        "maxArchiveFiles": 5,
+        "archiveEvery": "Day"
+      }
+      //"gelf-tcp": {
+      //  "type": "GelfTcp",
+      //  "facility": "${facility}",
+      //  "remoteAddress": "${graylog_address}",
+      //  "remotePort": 12201,
+      //  "layout": "${message}",
+      //  "verbose": true,
+      //  "parameters": [
+      //    {
+      //      "name": "requestId",
+      //      "layout": "${mdlc:item=RequestId:whenEmpty=null}"
+      //    },
+      //    {
+      //      "name": "uid",
+      //      "layout": "${mdlc:item=Uid:whenEmpty=null}"
+      //    },
+      //    {
+      //      "name": "operatorId",
+      //      "layout": "${mdlc:item=OperatorId:whenEmpty=null}"
+      //    }
+      //  ]
+      //}
+    },
+    "rules": [
+      {
+        "logger": "*",
+        "minLevel": "Debug",
+        "writeTo": "console"
+      },
+      {
+        "logger": "*",
+        "minLevel": "Debug",
+        "writeTo": "debug-file"
+      },
+      {
+        "logger": "Microsoft.*",
+        "minLevel": "Info",
+        "final": true
+      },
+      {
+        "logger": "*",
+        "minLevel": "Trace",
+        "writeTo": "trace-file"
+      }
+      //{
+      //  "logger": "*",
+      //  "minLevel": "Trace",
+      //  "writeTo": "gelf-tcp"
+      //}
+    ]
+  }
+}

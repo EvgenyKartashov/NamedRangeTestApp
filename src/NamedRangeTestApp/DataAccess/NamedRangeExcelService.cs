@@ -7,49 +7,48 @@ using NamedRangeTestApp.Models;
 using System;
 using System.Collections.Generic;
 
-namespace NamedRangeTestApp.DataAccess
+namespace NamedRangeTestApp.DataAccess;
+
+public class NamedRangeExcelService : ExcelService, INamedRangeExcelService
 {
-    public class NamedRangeExcelService : ExcelService, INamedRangeExcelService
+    private readonly ILogger<NamedRangeExcelService> _logger;
+
+    public NamedRangeExcelService(ILogger<NamedRangeExcelService> logger)
     {
-        private readonly ILogger<NamedRangeExcelService> _logger;
+        _logger = logger;
+    }
 
-        public NamedRangeExcelService(ILogger<NamedRangeExcelService> logger)
+    public IEnumerable<Cell> GetCellsByNamedRange(string namedRange)
+    {
+        using var package = InitPackage("Data", "testExcel.xlsx");
+
+        var wb = package.Workbook;
+        var cellRange = wb.Names[namedRange];
+
+        var result = cellRange.GetCells();
+
+        return result;
+    }
+
+    public void InsertValuesToNamedRange(string namedRange, object[] values)
+    {
+        using var package = InitPackage("Data", "testExcel.xlsx");
+
+        var wb = package.Workbook;
+        var cellRange = wb.Names[namedRange];
+
+        try
         {
-            _logger = logger;
+            cellRange.Insert(values);
+            package.Save();
         }
-
-        public IEnumerable<Cell> GetCellsByNamedRange(string namedRange)
+        catch (NamedRangeInsertException ex)
         {
-            using var package = InitPackage("Data", "testExcel.xlsx");
-
-            var wb = package.Workbook;
-            var cellRange = wb.Names[namedRange];
-
-            var result = cellRange.GetCells();
-
-            return result;
+            _logger.LogInformation(string.Join(',', ex.Values));
         }
-
-        public void InsertValuesToNamedRange(string namedRange, object[] values)
+        catch (Exception ex)
         {
-            using var package = InitPackage("Data", "testExcel.xlsx");
-
-            var wb = package.Workbook;
-            var cellRange = wb.Names[namedRange];
-
-            try
-            {
-                cellRange.Insert(values);
-                package.Save();
-            }
-            catch (NamedRangeInsertException ex)
-            {
-                _logger.LogInformation(string.Join(',', ex.Values));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-            }
+            _logger.LogError(ex.Message);
         }
     }
 }

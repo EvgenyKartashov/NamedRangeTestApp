@@ -1,0 +1,23 @@
+{
+  "QueueConfig": {
+    //"Host": "rabbitmq",
+    //"VirtualHost": "/",
+    //"Username": "rabbitmq",
+    //"Password": "rabbitmq"
+  },
+
+  "ConnectionStrings": {
+  },
+
+  "MetricsConfig": {
+    "Host": "*",
+    "Port": 3000,
+    "Disabled": false
+  },
+
+  "HealthCheckConfig": {
+    "Host": "*",
+    "Port": 4000,
+    "Disabled": false
+  }
+}

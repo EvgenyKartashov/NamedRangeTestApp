@@ -1,8 +1,7 @@
-﻿namespace NamedRangeTestApp.Models
+﻿namespace NamedRangeTestApp.Models;
+
+public class Cell
 {
-    public class Cell
-    {
-        public string Address { get; init; }
-        public string Value { get; init; }
-    }
+    public string Address { get; init; }
+    public string Value { get; init; }
 }
