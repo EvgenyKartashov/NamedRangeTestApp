@@ -60,6 +60,7 @@ namespace NamedRangeTestApp.Extensions
                 }
             }
 
+            //если значений в массиве values меньше, чем ячеек в именованном диапазоне, необходимо очистить оставшиеся ячейки в именованном диапазоне
             cellRange.ClearUnusedValues(currentCol, currentRow);
 
             if (notInsertedValues.Any())
@@ -73,9 +74,8 @@ namespace NamedRangeTestApp.Extensions
             var startCol = cellRange.Start.Column;
             var startRow = cellRange.Start.Row;
 
-            if (currentRow >= rowNum + startRow)
+            if (currentRow >= startRow + rowNum)
                 throw new IndexOutOfRangeException();
-            //return (currentCol, currentRow);
 
             var maxCol = startCol + colNum;
 
@@ -85,11 +85,11 @@ namespace NamedRangeTestApp.Extensions
             var nextCol = currentCol;
             var nextRow = currentRow;
 
-            nextCol = currentCol < maxCol - 1
+            nextCol = currentCol < (maxCol - 1)
                 ? nextCol + 1
                 : startCol;
 
-            nextRow = currentCol < maxCol - 1
+            nextRow = currentCol < (maxCol - 1)
                 ? nextRow
                 : nextRow + 1;
 

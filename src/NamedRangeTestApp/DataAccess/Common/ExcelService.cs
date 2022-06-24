@@ -6,7 +6,7 @@ namespace NamedRangeTestApp.DataAccess.Common
 {
     public abstract class ExcelService
     {
-        protected ExcelPackage InitPackage(string subdir, string fileName)
+        public static ExcelPackage InitPackage(string subdir, string fileName)
         {
             var currentDir = Directory.GetCurrentDirectory();
             var file = new FileInfo($"{currentDir}/{subdir}/{fileName}");
