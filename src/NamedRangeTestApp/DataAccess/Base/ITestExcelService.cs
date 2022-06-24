@@ -1,10 +1,10 @@
 ﻿using NamedRangeTestApp.Models;
 using System.Collections.Generic;
 
-namespace NamedRangeTestApp.DataAccess.Base
+namespace NamedRangeTestApp.DataAccess.Base;
+
+public interface ITestExcelService
 {
-    public interface ITestExcelService
-    {
-        IEnumerable<Cell> AddValuesToScenarioAndCalc(string namedRange, object[] values);
-    }
+    void AddValuesToScenario(IEnumerable<NamedRangeData> data);
+    Cell[] RecalculateModel();
 }

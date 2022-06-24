@@ -29,7 +29,7 @@ public class TestController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] InputModel input)
+    public IActionResult Post([FromBody] NamedRangeData input)
     {
         _namedRangeExcelService.InsertValuesToNamedRange(input.NamedRange, input.Values);
 
@@ -37,11 +37,11 @@ public class TestController : ControllerBase
     }
 
     [HttpPost("scenario")]
-    public IActionResult PostScenario([FromBody] InputModel input)
+    public IActionResult PostScenario([FromBody] ScenarioInputModel input)
     {
-        var result = _testExcelService.AddValuesToScenarioAndCalc(input.NamedRange, input.Values);
+        _testExcelService.AddValuesToScenario(input.NamedRanges);
 
-        return StatusCode(201, result);
+        return StatusCode(201);
     }
 }
 

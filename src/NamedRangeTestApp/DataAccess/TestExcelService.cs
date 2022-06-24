@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Core.Logging.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NamedRangeTestApp.DataAccess.Base;
 using NamedRangeTestApp.DataAccess.Common;
@@ -17,8 +18,7 @@ public class TestExcelService : ExcelService, ITestExcelService
     private readonly string _baseFolder;
     private readonly string _scenarioFileName;
     private readonly string _calcFileName;
-
-    private ExcelPackage _scenarioPackage;
+    private readonly string _configFileName;
 
     public TestExcelService(ILogger<TestExcelService> logger, IConfiguration config)
     {
@@ -27,39 +27,44 @@ public class TestExcelService : ExcelService, ITestExcelService
         _baseFolder = config.GetValue<string>("Files:BaseFolder");
         _scenarioFileName = config.GetValue<string>("Files:Scenario");
         _calcFileName = config.GetValue<string>("Files:Calc");
+        _configFileName = config.GetValue<string>("Files:Config");
     }
 
-    public IEnumerable<Cell> AddValuesToScenarioAndCalc(string namedRange, object[] values)
+    public void AddValuesToScenario(IEnumerable<NamedRangeData> data)
     {
-        InsertValuesToScenario(namedRange, values);
-        var cells = InsertValuesToCalc(namedRange);
-        DisposeScenarioPackage();
-
-        return cells;
-    }
-
-    private void InsertValuesToScenario(string namedRange, object[] values)
-    {
-        _scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
+        using var _scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
 
         var scenarioWb = _scenarioPackage.Workbook;
-        var scenarioCellRange = scenarioWb.Names.First(range => range.Name == namedRange);
 
-        try
+        foreach (var namedRangeData in data)
         {
-            scenarioCellRange.Insert(values);
-        }
-        catch (NamedRangeInsertException ex)
-        {
-            _logger.LogInformation(string.Join(',', ex.Values));
+            var namedRange = namedRangeData.NamedRange;
+            var values = namedRangeData.Values;
+
+            var scenarioCellRange = scenarioWb.Names.First(range => range.Name == namedRange);
+
+            try
+            {
+                scenarioCellRange.Insert(values);
+            }
+            catch (NamedRangeInsertException ex)
+            {
+                _logger.Info(string.Join(',', ex.Values))
+                       .Write();
+            }
         }
 
         _scenarioPackage.Save();
     }
 
-    private Cell[] InsertValuesToCalc(string namedRange)
+    public Cell[] RecalculateModel()
     {
+        using var _scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
+
         var scenarioWb = _scenarioPackage.Workbook;
+
+
+        //todo: here, parse json
         var scenarioCellRange = scenarioWb.Names[namedRange];
 
         var values = scenarioCellRange.GetCells()
@@ -86,10 +91,5 @@ public class TestExcelService : ExcelService, ITestExcelService
         var result = calcCellRange.GetCells().ToArray();
 
         return result;
-    }
-
-    private void DisposeScenarioPackage()
-    {
-        _scenarioPackage.Dispose();
     }
 }
