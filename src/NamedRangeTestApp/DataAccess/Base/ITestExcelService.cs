@@ -6,5 +6,5 @@ namespace NamedRangeTestApp.DataAccess.Base;
 public interface ITestExcelService
 {
     void AddValuesToScenario(IEnumerable<NamedRangeData> data);
-    Cell[] RecalculateModel();
+    void RecalculateModel();
 }

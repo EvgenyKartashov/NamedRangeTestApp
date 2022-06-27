@@ -1,13 +1,25 @@
 {
+  "ScenarioName": "scenario.xlsx",
   "Models": [
     {
       "Name": "test_calc.xlsx",
-      "ScenarioName": "scenario.xlsx",
       "Correlations": [
-        { "ModelRange" : "general_single_cell", "ScenarioRange": "general_single_cell" },
-        { "ModelRange" : "general_column_cells", "ScenarioRange": "general_column_cells" },
-        { "ModelRange": "general_row_cells", "ScenarioRange": "general_row_cells" },
-        { "ModelRange" : "general_table_cells", "ScenarioRange": "general_table_cells" }
+        {
+          "ModelRange": "general_single_cell",
+          "ScenarioRange": "general_single_cell"
+        },
+        {
+          "ModelRange": "general_column_cells",
+          "ScenarioRange": "general_column_cells"
+        },
+        {
+          "ModelRange": "general_row_cells",
+          "ScenarioRange": "general_row_cells"
+        },
+        {
+          "ModelRange": "general_table_cells",
+          "ScenarioRange": "general_table_cells"
+        }
       ]
     }
   ]

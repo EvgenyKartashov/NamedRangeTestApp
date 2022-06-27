@@ -28,13 +28,13 @@ public class TestController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost]
-    public IActionResult Post([FromBody] NamedRangeData input)
-    {
-        _namedRangeExcelService.InsertValuesToNamedRange(input.NamedRange, input.Values);
+    //[HttpPost]
+    //public IActionResult Post([FromBody] NamedRangeData input)
+    //{
+    //    _namedRangeExcelService.InsertValuesToNamedRange(input.NamedRange, input.Values);
 
-        return StatusCode(201);
-    }
+    //    return StatusCode(201);
+    //}
 
     [HttpPost("scenario")]
     public IActionResult PostScenario([FromBody] ScenarioInputModel input)

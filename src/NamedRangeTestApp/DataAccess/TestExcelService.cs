@@ -8,7 +8,9 @@ using NamedRangeTestApp.Extensions;
 using NamedRangeTestApp.Models;
 using OfficeOpenXml;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace NamedRangeTestApp.DataAccess;
 
@@ -32,9 +34,9 @@ public class TestExcelService : ExcelService, ITestExcelService
 
     public void AddValuesToScenario(IEnumerable<NamedRangeData> data)
     {
-        using var _scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
+        using var scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
 
-        var scenarioWb = _scenarioPackage.Workbook;
+        var scenarioWb = scenarioPackage.Workbook;
 
         foreach (var namedRangeData in data)
         {
@@ -45,7 +47,7 @@ public class TestExcelService : ExcelService, ITestExcelService
 
             try
             {
-                scenarioCellRange.Insert(values);
+                scenarioCellRange.Insert(values.Cast<object>().ToArray());
             }
             catch (NamedRangeInsertException ex)
             {
@@ -54,41 +56,52 @@ public class TestExcelService : ExcelService, ITestExcelService
             }
         }
 
-        _scenarioPackage.Save();
+        scenarioPackage.Save();
     }
 
-    public Cell[] RecalculateModel()
+    //todo: test inserting and calculation
+    public void RecalculateModel()
     {
-        using var _scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
+        using var scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
+        using var modelPackage = InitPackage(_baseFolder, _calcFileName);
 
-        var scenarioWb = _scenarioPackage.Workbook;
+        var scenarioWb = scenarioPackage.Workbook;
+        var modelWb = modelPackage.Workbook;
 
+        var correlations = GetCorrelations();
 
-        //todo: here, parse json
-        var scenarioCellRange = scenarioWb.Names[namedRange];
+        var modelCorrelation = correlations.Models.Single(model => model.Name == _calcFileName);
 
-        var values = scenarioCellRange.GetCells()
-            .Select(cell => cell.Value)
-            .ToArray();
-
-        using var testCalcPackage = InitPackage(_baseFolder, _calcFileName);
-
-        var calcWb = testCalcPackage.Workbook;
-        var calcCellRange = calcWb.Names.First(range => range.Name == namedRange);
-
-        try
+        foreach (var correlation in modelCorrelation.Correlations)
         {
-            calcCellRange.Insert(values);
-        }
-        catch (NamedRangeInsertException ex)
-        {
-            _logger.LogInformation(string.Join(',', ex.Values));
+            var scenarioCellRange = scenarioWb.Names.Single(range => range.Name == correlation.ScenarioRange);
+
+            var values = scenarioCellRange.GetCells()
+                .Select(cell => cell.Value)
+                .ToArray();
+
+            var modelCellRange = modelWb.Names.Single(range => range.Name == correlation.ModelRange);
+
+            try
+            {
+                modelCellRange.Insert(values);
+            }
+            catch (NamedRangeInsertException ex)
+            {
+                _logger.Warn("неравные именованные диапазоны", ex.Values).Write();
+            }
         }
 
-        calcWb.Calculate();
-        testCalcPackage.Save();
+        modelWb.Calculate();
+        modelPackage.Save();
+    }
 
-        var result = calcCellRange.GetCells().ToArray();
+    private ScenarioCorrelation GetCorrelations()
+    {
+        var currentDir = Directory.GetCurrentDirectory();
+        var config = File.ReadAllText($"{currentDir}/{_baseFolder}/{_configFileName}");
+
+        var result = JsonSerializer.Deserialize<ScenarioCorrelation>(config);
 
         return result;
     }
