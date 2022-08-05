@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using NamedRangeTestApp.DataAccess;
 using NamedRangeTestApp.DataAccess.Base;
+using NamedRangeTestApp.Services;
+using NamedRangeTestApp.Services.Base;
 
 namespace NamedRangeTestApp.Extensions;
 
@@ -16,6 +18,8 @@ internal static class ProgramExtensions
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
+        services.AddTransient<INamedRangeService, NamedRangeService>();
+
         services.AddTransient<INamedRangeExcelService, NamedRangeExcelService>();
         services.AddTransient<ITestExcelService, TestExcelService>();
 

@@ -67,6 +67,38 @@ internal static class ExcelNamedRangeExtensions
             throw new NamedRangeInsertException { Values = notInsertedValues.ToArray() };
     }
 
+    internal static void InsertInt(this ExcelNamedRange cellRange, int?[] values)
+    {
+        var startCol = cellRange.Start.Column;
+        var startRow = cellRange.Start.Row;
+
+        var currentCol = startCol;
+        var currentRow = startRow;
+
+        var notInsertedValues = new List<object>();
+
+        foreach (var value in values)
+        {
+            try
+            {
+                var (col, row) = cellRange.InsertValue(currentCol, currentRow, value);
+
+                currentCol = col;
+                currentRow = row;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                notInsertedValues.Add(value);
+            }
+        }
+
+        //если значений в массиве values меньше, чем ячеек в именованном диапазоне, необходимо очистить оставшиеся ячейки в именованном диапазоне
+        cellRange.ClearUnusedValues(currentCol, currentRow);
+
+        if (notInsertedValues.Any())
+            throw new NamedRangeInsertException { Values = notInsertedValues.ToArray() };
+    }
+
     private static (int nextCol, int nextRow) InsertValue(this ExcelNamedRange cellRange, int currentCol, int currentRow, object value)
     {
         var colNum = cellRange.Columns;

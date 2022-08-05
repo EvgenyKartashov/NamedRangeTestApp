@@ -20,7 +20,7 @@ public class NamedRangeExcelService : ExcelService, INamedRangeExcelService
 
     public IEnumerable<Cell> GetCellsByNamedRange(string namedRange)
     {
-        using var package = InitPackage("Data", "testExcel.xlsx");
+        using var package = InitPackage("Data/testSet", "test_calc.xlsx");
 
         var wb = package.Workbook;
         var cellRange = wb.Names[namedRange];

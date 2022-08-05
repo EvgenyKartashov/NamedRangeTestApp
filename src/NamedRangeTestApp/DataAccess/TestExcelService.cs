@@ -59,7 +59,6 @@ public class TestExcelService : ExcelService, ITestExcelService
         scenarioPackage.Save();
     }
 
-    //todo: test inserting and calculation
     public void RecalculateModel()
     {
         using var scenarioPackage = InitPackage(_baseFolder, _scenarioFileName);
@@ -77,14 +76,20 @@ public class TestExcelService : ExcelService, ITestExcelService
             var scenarioCellRange = scenarioWb.Names.Single(range => range.Name == correlation.ScenarioRange);
 
             var values = scenarioCellRange.GetCells()
-                .Select(cell => cell.Value)
+                .Select(cell =>
+                {
+                    if (int.TryParse(cell.Value, out int i))
+                        return i;
+
+                    return (int?)null;
+                })
                 .ToArray();
 
             var modelCellRange = modelWb.Names.Single(range => range.Name == correlation.ModelRange);
 
             try
             {
-                modelCellRange.Insert(values);
+                modelCellRange.InsertInt(values);
             }
             catch (NamedRangeInsertException ex)
             {
