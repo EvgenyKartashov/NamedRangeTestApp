@@ -10,6 +10,18 @@ public static class CalcNamedRangeDictionary
         [CalcNamedRange.OtherOperations] = "other",
         [CalcNamedRange.ColumnCellsSum] = "column_cells_sum",
         [CalcNamedRange.RowCellsSum] = "row_cells_sum",
+
+        [CalcNamedRange.ArraysSum] = "arrays_sum",
+        [CalcNamedRange.AggregationFunctions] = "aggregation_functions",
+        [CalcNamedRange.AggregationFunctionsWithCondition] = "aggregation_functions_with_conditions",
+        [CalcNamedRange.OtherArrayFunctions] = "other_array_functions",
+
+        [CalcNamedRange.Strings] = "strings",
+        [CalcNamedRange.Arrays] = "arrays",
+
+        [CalcNamedRange.Others] = "others",
+        [CalcNamedRange.Column] = "column",
+        [CalcNamedRange.Row] = "row",
     };
 
     public static string GetRangeName(this CalcNamedRange range)

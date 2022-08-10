@@ -8,5 +8,13 @@ public enum CalcNamedRange
     OtherOperations,
     ColumnCellsSum,
     RowCellsSum,
-
+    ArraysSum, //not implemented
+    AggregationFunctions,
+    AggregationFunctionsWithCondition,
+    OtherArrayFunctions,
+    Strings,
+    Arrays,
+    Others,
+    Column,
+    Row
 }
